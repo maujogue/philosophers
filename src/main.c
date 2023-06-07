@@ -6,60 +6,80 @@
 /*   By: maujogue <maujogue@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 10:47:32 by maujogue          #+#    #+#             */
-/*   Updated: 2023/06/06 15:10:32 by maujogue         ###   ########.fr       */
+/*   Updated: 2023/06/07 16:31:07 by maujogue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../header/philo.h"
 #include <time.h>
 
-pthread_mutex_t mutex;
-
-void    *routine(void *nb)
+void	philo_dies(t_all *all, struct timeval time, int i)
 {
-	pthread_mutex_lock(&mutex);
-	// printf("philosophers %d created\n", *(int*)i);
-	pthread_mutex_unlock(&mutex);
-	free(nb);
-	return (nb);
+	print_message(all, time, DEAD, i);
+	pthread_mutex_lock(&(all->w_mutex));
+	all->stop = 1;
+	pthread_mutex_unlock(&(all->w_mutex));
 }
 
-int	philo(t_table *table)
+void	philo_eats(t_all *all, struct timeval time, int i)
 {
-	int	i;
-	int	*a;
-	int	*res;
+	if (calculate_time(time) - all->philo[i]->last_meal > all->tt_die)
+		return (philo_dies(all, time, i));
+	pthread_mutex_lock(&(all->philo[i]->l_fork));
+	print_message(all, time, FORK, i);
+	pthread_mutex_lock(&(all->philo[i]->r_fork));
+	print_message(all, time, FORK, i);
+	print_message(all, time, EAT, i);
+	all->philo[i]->last_meal = calculate_time(time);
+	usleep(all->tt_eat * 1000);
+	pthread_mutex_unlock(&(all->philo[i]->l_fork));
+	pthread_mutex_unlock(&(all->philo[i]->r_fork));
+}
 
-	i = 0;
-	pthread_mutex_init(&mutex, NULL);
-	while (i < table->nb_ph)
+void	philo_sleeps(t_all *all, struct timeval time, int i)
+{
+	if (calculate_time(time) - all->philo[i]->last_meal > all->tt_die)
+		return (philo_dies(all, time, i));
+	print_message(all, time, SLEEP, i);
+	usleep(all->tt_sleep * 1000);
+}
+
+void	philo_thinks(t_all *all, struct timeval time, int i)
+{
+	if (calculate_time(time) - all->philo[i]->last_meal > all->tt_die)
+		return (philo_dies(all, time, i));
+	print_message(all, time, THINK, i);	
+}
+
+
+
+void    *routine(void *all_i)
+{
+	t_all *all = (t_all *)all_i;
+	struct	timeval time;
+	int	i;
+
+	if (all->i == all->nb)
+		all->i = 0;
+    i = all->i++;
+	gettimeofday(&time, NULL);
+	while (all->stop == 0)
 	{
-		a = malloc(sizeof(int));
-		*a = i;
-		if (pthread_create(&(table->th[i]), NULL, &routine, a) != 0)
-			return (perror(""), 1);
-		i++;
+		printf("-->%d\n", all->stop);
+		philo_eats(all, time, i);
+		philo_sleeps(all, time, i);
+		philo_thinks(all, time, i);
 	}
-	i = 0;
-	while (i < table->nb_ph)
-	{
-		if (pthread_join(table->th[i], (void **)&res) != 0)
-			return (perror(""), 1);
-		printf("philosophers %d created\n", *(int *)res);
-		i++;
-	}
-	pthread_mutex_destroy(&mutex);
-	free(res);
-	return (0);
+	return (all_i);
 }
 
 int	main(int argc, char **argv)
 {
-	t_table		table;
+	t_all		all;
 
-	if (argc != 2)
+	if (argc != 5)
 		return (0);
-	init_philo(&table, argv);
-	philo(&table);
+	init_all(&all, argv);
+	// philo(&all);
 	return (0);
 }
