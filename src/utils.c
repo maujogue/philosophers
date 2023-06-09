@@ -6,7 +6,7 @@
 /*   By: maujogue <maujogue@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/07 13:00:06 by maujogue          #+#    #+#             */
-/*   Updated: 2023/06/09 13:16:53 by maujogue         ###   ########.fr       */
+/*   Updated: 2023/06/09 17:30:58 by maujogue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,15 +44,53 @@ void	print_message(t_all *all, int status, int i)
 	pthread_mutex_unlock(&(all->w_mutex));
 }
 
-void	ft_usleep(t_all *all, int time_to, int i)
+void	free_exit(t_all *all)
 {
-	time_to *= 1000;
-	while (time_to > 0)
+	int	i;
+
+	i = 0;
+	while (all->philo[i])
+	{
+		pthread_mutex_unlock(all->philo[i]->l_fork);
+		pthread_mutex_unlock(&(all->philo[i]->r_fork));
+		free(all->philo[i]->th);
+		free(all->philo[i]);
+	}
+	pthread_mutex_unlock(&(all->w_mutex));
+	pthread_mutex_unlock(&(all->stop_mutex));
+	free(all->philo);
+}
+
+int	is_philo_dead(t_all *all, int i)
+{
+	int	time_since_last_meal;
+
+	pthread_mutex_lock(&(all->philo[i]->last_meal_mutex));
+	time_since_last_meal
+		= calculate_time(all->time) - all->philo[i]->last_meal;
+	pthread_mutex_unlock(&(all->philo[i]->last_meal_mutex));
+	if (time_since_last_meal > all->tt_die)
+	{
+		print_message(all, DEAD, i);
+		pthread_mutex_lock(&(all->stop_mutex));
+		all->stop = 1;
+		pthread_mutex_unlock(&(all->stop_mutex));
+		return (0);
+	}
+	return (1);
+}
+
+void	check_philo(t_all *all)
+{
+	int	i;
+
+	i = 0;
+	while (1)
 	{
 		if (is_philo_dead(all, i) == 0)
-			return ;
-		time_to -= 10000;
-		usleep(10000);
-		// printf("%d\n", time_to);
+			break ;
+		i += 1;
+		if (i == all->nb)
+			i = 0;
 	}
 }
