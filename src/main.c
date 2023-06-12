@@ -6,7 +6,7 @@
 /*   By: maujogue <maujogue@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 10:47:32 by maujogue          #+#    #+#             */
-/*   Updated: 2023/06/09 17:31:57 by maujogue         ###   ########.fr       */
+/*   Updated: 2023/06/12 11:33:37 by maujogue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,6 @@
 
 int	philo_eats(t_all *all, int i)
 {
-	// if ((all->tt_die < all->tt_eat + all->tt_sleep)
-	// 	|| (all->nb % 2 == 1 && all->tt_die < all->tt_eat * 3)
-	//  || (all->nb % 2 == 0 && all->tt_die < all->tt_eat * 2))
 	pthread_mutex_lock(all->philo[i]->l_fork);
 	pthread_mutex_lock(&(all->philo[i]->r_fork));
 	print_message(all, FORK, i);
@@ -26,10 +23,13 @@ int	philo_eats(t_all *all, int i)
 	print_message(all, EAT, i);
 	all->philo[i]->nb_meal--;
 	usleep(all->tt_eat * 1000);
-	pthread_mutex_unlock(all->philo[i]->l_fork);
 	pthread_mutex_unlock(&(all->philo[i]->r_fork));
+	pthread_mutex_unlock(all->philo[i]->l_fork);
 	if (all->nb_meal != -1 && all->philo[i]->nb_meal == 0)
+	{
+		all->stop = 1;
 		return (1);
+	}
 	return (0);
 }
 
@@ -57,6 +57,28 @@ void	*routine(void *all_i)
 	return (NULL);
 }
 
+void	philo(t_all *all)
+{
+	int	i;
+
+	i = 0;
+	while (all->philo[i])
+	{
+		if (pthread_create(all->philo[i]->th, NULL, &routine, (void *)all) != 0)
+			return (perror("ERROR"));
+		i++;
+	}
+	i = 0;
+	check_philo(all);
+	while (all->philo[i])
+	{
+		if (pthread_join(*(all->philo[i]->th), NULL) != 0)
+			return (perror("ERROR"));
+		pthread_detach(*(all->philo[i]->th));
+		i++;
+	}
+}
+
 int	main(int argc, char **argv)
 {
 	t_all		all;
@@ -64,7 +86,7 @@ int	main(int argc, char **argv)
 	if ((argc == 5 || argc == 6) && init_all(&all, argv, argc) == 0)
 	{
 		philo(&all);
-		// free_exit(&all);
+		free_exit(&all, 0);
 	}
 	else
 		write(2, "Invalid parameters\n", 20);

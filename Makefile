@@ -15,8 +15,8 @@ SRC			 			= main.c	parsing.c	utils.c
 OBJECTS			    	= $(SRC:%.c=$(BUILD_DIR)%.o)
 	
 CC						= cc
-CFLAGS					= -Wall #-Wextra -Werror
-SANITIZE				= $(CFLAGS) -fsanitize=address
+CFLAGS					= -Wall -Wextra -Werror
+SANITIZE				= $(CFLAGS) -fsanitize=thread
 
 RM 						= rm -rf
 CLEAR					= clear

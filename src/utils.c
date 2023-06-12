@@ -6,7 +6,7 @@
 /*   By: maujogue <maujogue@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/07 13:00:06 by maujogue          #+#    #+#             */
-/*   Updated: 2023/06/09 17:30:58 by maujogue         ###   ########.fr       */
+/*   Updated: 2023/06/12 11:13:01 by maujogue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,21 +44,21 @@ void	print_message(t_all *all, int status, int i)
 	pthread_mutex_unlock(&(all->w_mutex));
 }
 
-void	free_exit(t_all *all)
+void	free_exit(t_all *all, int exit_code)
 {
 	int	i;
 
 	i = 0;
-	while (all->philo[i])
+	while (all->philo && all->philo[i])
 	{
-		pthread_mutex_unlock(all->philo[i]->l_fork);
-		pthread_mutex_unlock(&(all->philo[i]->r_fork));
 		free(all->philo[i]->th);
 		free(all->philo[i]);
+		i++;
 	}
-	pthread_mutex_unlock(&(all->w_mutex));
-	pthread_mutex_unlock(&(all->stop_mutex));
 	free(all->philo);
+	if (exit_code == 1)
+		write(2, "Malloc Error\n", 13);
+	exit(exit_code);
 }
 
 int	is_philo_dead(t_all *all, int i)
