@@ -6,7 +6,7 @@
 /*   By: maujogue <maujogue@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 10:47:32 by maujogue          #+#    #+#             */
-/*   Updated: 2023/06/12 13:50:48 by maujogue         ###   ########.fr       */
+/*   Updated: 2023/06/12 14:28:00 by maujogue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,16 @@
 
 int	philo_eats(t_all *all, int i)
 {
-	pthread_mutex_lock(all->philo[i]->l_fork);
-	pthread_mutex_lock(&(all->philo[i]->r_fork));
+	if (i == 0)
+	{
+		pthread_mutex_lock(&(all->philo[i]->r_fork));
+		pthread_mutex_lock(all->philo[i]->l_fork);
+	}
+	else
+	{
+		pthread_mutex_lock(all->philo[i]->l_fork);
+		pthread_mutex_lock(&(all->philo[i]->r_fork));
+	}
 	print_message(all, FORK, i);
 	print_message(all, FORK, i);
 	all->philo[i]->last_meal = calculate_time(all->time);
