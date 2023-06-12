@@ -10,7 +10,7 @@ HEADER_FILE				= minishell.h pipex.h
 
 DIR						= src/
 
-SRC			 			= main.c	parsing.c	utils.c
+SRC			 			= main.c	parsing.c	utils.c	check_end_of_loop.c
 							
 OBJECTS			    	= $(SRC:%.c=$(BUILD_DIR)%.o)
 	

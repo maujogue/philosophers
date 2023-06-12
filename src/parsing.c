@@ -6,15 +6,16 @@
 /*   By: maujogue <maujogue@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 14:41:37 by maujogue          #+#    #+#             */
-/*   Updated: 2023/06/12 11:18:05 by maujogue         ###   ########.fr       */
+/*   Updated: 2023/06/12 13:50:33 by maujogue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../header/philo.h"
 
-void	init_fork_mutex(t_all *all, int i)
+void	init_philo_mutex(t_all *all, int i)
 {
 	pthread_mutex_init(&(all->philo[i]->last_meal_mutex), NULL);
+	pthread_mutex_init(&(all->philo[i]->nb_meal_mutex), NULL);
 	if (i == 0)
 		pthread_mutex_init(&(all->philo[i]->r_fork), NULL);
 	else
@@ -44,7 +45,7 @@ void	init_philo(t_all *all)
 		all->philo[i]->id = i + 1;
 		all->philo[i]->last_meal = 0;
 		all->philo[i]->nb_meal = all->nb_meal;
-		init_fork_mutex(all, i);
+		init_philo_mutex(all, i);
 		i++;
 	}
 	all->philo[i] = NULL;

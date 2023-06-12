@@ -6,7 +6,7 @@
 /*   By: maujogue <maujogue@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 10:46:54 by maujogue          #+#    #+#             */
-/*   Updated: 2023/06/12 10:50:10 by maujogue         ###   ########.fr       */
+/*   Updated: 2023/06/12 13:50:56 by maujogue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ typedef struct philo
 	pthread_mutex_t	*l_fork;
 	pthread_mutex_t	r_fork;
 	pthread_mutex_t	last_meal_mutex;
+	pthread_mutex_t	nb_meal_mutex;
 	pthread_t		*th;
 	int				id;
 	int				last_meal;
@@ -52,14 +53,11 @@ typedef struct all
 }	t_all;
 
 int		init_all(t_all *all, char **argv, int argc);
-void	init_philo(t_all *all);
 void	philo(t_all *all);
 int		calculate_time(struct timeval start_time);
 void	*routine(void *all_i);
 void	print_message(t_all *all, int status, int i);
-int		is_philo_dead(t_all *all, int i);
 void	free_exit(t_all *all, int exit_code);
-void	check_philo(t_all *all);
-int		is_philo_dead(t_all *all, int i);
+void	check_end_of_loop(t_all *all);
 
 #endif

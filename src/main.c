@@ -6,7 +6,7 @@
 /*   By: maujogue <maujogue@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 10:47:32 by maujogue          #+#    #+#             */
-/*   Updated: 2023/06/12 11:33:37 by maujogue         ###   ########.fr       */
+/*   Updated: 2023/06/12 13:50:48 by maujogue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,13 +23,12 @@ int	philo_eats(t_all *all, int i)
 	print_message(all, EAT, i);
 	all->philo[i]->nb_meal--;
 	usleep(all->tt_eat * 1000);
-	pthread_mutex_unlock(&(all->philo[i]->r_fork));
 	pthread_mutex_unlock(all->philo[i]->l_fork);
+	pthread_mutex_unlock(&(all->philo[i]->r_fork));
+	pthread_mutex_lock(&(all->philo[i]->nb_meal_mutex));
 	if (all->nb_meal != -1 && all->philo[i]->nb_meal == 0)
-	{
-		all->stop = 1;
-		return (1);
-	}
+		return (pthread_mutex_unlock(&(all->philo[i]->nb_meal_mutex)), 1);
+	pthread_mutex_unlock(&(all->philo[i]->nb_meal_mutex));
 	return (0);
 }
 
@@ -69,7 +68,7 @@ void	philo(t_all *all)
 		i++;
 	}
 	i = 0;
-	check_philo(all);
+	check_end_of_loop(all);
 	while (all->philo[i])
 	{
 		if (pthread_join(*(all->philo[i]->th), NULL) != 0)
