@@ -6,39 +6,12 @@
 /*   By: maujogue <maujogue@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 10:47:32 by maujogue          #+#    #+#             */
-/*   Updated: 2023/06/12 14:28:00 by maujogue         ###   ########.fr       */
+/*   Updated: 2023/06/14 11:27:13 by maujogue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../header/philo.h"
 #include <time.h>
-
-int	philo_eats(t_all *all, int i)
-{
-	if (i == 0)
-	{
-		pthread_mutex_lock(&(all->philo[i]->r_fork));
-		pthread_mutex_lock(all->philo[i]->l_fork);
-	}
-	else
-	{
-		pthread_mutex_lock(all->philo[i]->l_fork);
-		pthread_mutex_lock(&(all->philo[i]->r_fork));
-	}
-	print_message(all, FORK, i);
-	print_message(all, FORK, i);
-	all->philo[i]->last_meal = calculate_time(all->time);
-	print_message(all, EAT, i);
-	all->philo[i]->nb_meal--;
-	usleep(all->tt_eat * 1000);
-	pthread_mutex_unlock(all->philo[i]->l_fork);
-	pthread_mutex_unlock(&(all->philo[i]->r_fork));
-	pthread_mutex_lock(&(all->philo[i]->nb_meal_mutex));
-	if (all->nb_meal != -1 && all->philo[i]->nb_meal == 0)
-		return (pthread_mutex_unlock(&(all->philo[i]->nb_meal_mutex)), 1);
-	pthread_mutex_unlock(&(all->philo[i]->nb_meal_mutex));
-	return (0);
-}
 
 void	*routine(void *all_i)
 {
@@ -47,6 +20,8 @@ void	*routine(void *all_i)
 
 	all = (t_all *)all_i;
 	i = all->i++;
+	if (all->philo[i]->id % 2 == 1)
+		usleep(all->tt_eat * 1000);
 	if (all->nb == 1 && i == 0)
 	{
 		print_message(all, FORK, i);
@@ -60,6 +35,8 @@ void	*routine(void *all_i)
 		print_message(all, SLEEP, i);
 		usleep(all->tt_sleep * 1000);
 		print_message(all, THINK, i);
+		if (all->nb % 2 == 1)
+			usleep(all->tt_eat * 1000);
 	}
 	return (NULL);
 }
@@ -74,6 +51,7 @@ void	philo(t_all *all)
 		if (pthread_create(all->philo[i]->th, NULL, &routine, (void *)all) != 0)
 			return (perror("ERROR"));
 		i++;
+		usleep(100);
 	}
 	i = 0;
 	check_end_of_loop(all);
@@ -81,7 +59,6 @@ void	philo(t_all *all)
 	{
 		if (pthread_join(*(all->philo[i]->th), NULL) != 0)
 			return (perror("ERROR"));
-		pthread_detach(*(all->philo[i]->th));
 		i++;
 	}
 }

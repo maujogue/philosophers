@@ -6,7 +6,7 @@
 /*   By: maujogue <maujogue@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 10:46:54 by maujogue          #+#    #+#             */
-/*   Updated: 2023/06/12 13:50:56 by maujogue         ###   ########.fr       */
+/*   Updated: 2023/06/14 09:55:59 by maujogue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ int		init_all(t_all *all, char **argv, int argc);
 void	philo(t_all *all);
 int		calculate_time(struct timeval start_time);
 void	*routine(void *all_i);
+int		philo_eats(t_all *all, int i);
 void	print_message(t_all *all, int status, int i);
 void	free_exit(t_all *all, int exit_code);
 void	check_end_of_loop(t_all *all);
